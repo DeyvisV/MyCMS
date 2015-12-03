@@ -17,3 +17,4 @@ Route::get('/', function()
 });
 
 Route::resource('admin/sections', 'AdminSectionsController');
+Route::resource('admin/news', 'AdminNewsController');

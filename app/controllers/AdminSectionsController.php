@@ -2,6 +2,15 @@
 
 class AdminSectionsController extends \BaseController {
 
+	protected $rules = array(
+			'name' => 'required',
+			'slug_url' => 'required',
+			'type' => 'required|in:page,blog',
+			'menu' => 'in:1,0',
+			'published' => 'in:1,0',
+			'menu_order' => 'integer'
+		);
+
 	/**
 	 * Display a listing of the resource.
 	 *
@@ -9,7 +18,9 @@ class AdminSectionsController extends \BaseController {
 	 */
 	public function index()
 	{
-		return View::make('admin/sections/list');
+		$sections = Section::search(Input::all());
+
+		return View::make('admin/sections/list', compact('sections'));
 	}
 
 
@@ -67,7 +78,7 @@ class AdminSectionsController extends \BaseController {
 	 */
 	public function show($id)
 	{
-		$section = Section::find($id);
+		$section = Section::findOrFail($id);
 		return View::make('admin/sections/show')->with('section', $section);
 	}
 
@@ -80,7 +91,8 @@ class AdminSectionsController extends \BaseController {
 	 */
 	public function edit($id)
 	{
-		//
+		$section = Section::findOrFail($id);
+		return View::make('admin/sections/edit')->with('section', $section);
 	}
 
 
@@ -92,7 +104,22 @@ class AdminSectionsController extends \BaseController {
 	 */
 	public function update($id)
 	{
-		//
+		$section = Section::findOrFail($id);
+
+		$data = Input::all();
+		
+		$validator = Validator::make($data, $this->rules);
+
+		if ($validator->passes()) 
+		{
+			$section->fill($data);
+			$section->save();
+			return Redirect::route('admin.sections.show', $section->id);
+		} 
+		else 
+		{
+			return Redirect::back()->withInput()->withErrors($validator->messages());
+		}
 	}
 
 
@@ -104,7 +131,10 @@ class AdminSectionsController extends \BaseController {
 	 */
 	public function destroy($id)
 	{
-		//
+		$section = Section::findOrFail($id);
+		$section->delete();
+
+		Redirect::route('admin.sections.index');
 	}
 
 

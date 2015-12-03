@@ -4,6 +4,9 @@
 	"keywords": ["framework", "laravel"],
 	"license": "MIT",
 	"type": "project",
+	"require-dev": {
+		"fzaninotto/faker": "1.5.*@dev"
+	},
 	"require": {
 		"laravel/framework": "4.2.*"
 	},
