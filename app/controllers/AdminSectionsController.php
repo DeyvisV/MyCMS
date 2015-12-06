@@ -1,5 +1,7 @@
 <?php
 
+use Cms\Section\SectionRepo;
+
 class AdminSectionsController extends \BaseController {
 
 	protected $rules = array(
@@ -11,35 +13,25 @@ class AdminSectionsController extends \BaseController {
 			'menu_order' => 'integer'
 		);
 
-	/**
-	 * Display a listing of the resource.
-	 *
-	 * @return Response
-	 */
+	protected $sectionRepo;
+
+	public function __construct(SectionRepo $sectionRepo)
+	{
+		$this->sectionRepo = $sectionRepo;
+	}
+
 	public function index()
 	{
-		$sections = Section::search(Input::all());
+		$sections = $this->sectionRepo->search(Input::all(), \Cms\Base\BaseRepo::PAGINATE);
 
 		return View::make('admin/sections/list', compact('sections'));
 	}
 
-
-	/**
-	 * Show the form for creating a new resource.
-	 *
-	 * @return Response
-	 */
 	public function create()
 	{
 		return View::make('admin/sections/create');
 	}
 
-
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @return Response
-	 */
 	public function store()
 	{
 		$data = Input::all();
@@ -57,54 +49,32 @@ class AdminSectionsController extends \BaseController {
 
 		if ($validator->passes()) 
 		{
-			$section = Section::create($data);
+			$section = $this->sectionRepo->create($data);
 		} 
 		else 
 		{
 			return Redirect::back()->withInput()->withErrors($validator->messages());
 		}
 		
-
-		
 		return Redirect::to('admin/sections/'. $section->id);
 	}
 
 
-	/**
-	 * Display the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
 	public function show($id)
 	{
-		$section = Section::findOrFail($id);
+		$section = $this->sectionRepo->findOrFail($id);
 		return View::make('admin/sections/show')->with('section', $section);
 	}
 
-
-	/**
-	 * Show the form for editing the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
 	public function edit($id)
 	{
-		$section = Section::findOrFail($id);
+		$section = $this->sectionRepo->findOrFail($id);
 		return View::make('admin/sections/edit')->with('section', $section);
 	}
 
-
-	/**
-	 * Update the specified resource in storage.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
 	public function update($id)
 	{
-		$section = Section::findOrFail($id);
+		$section = $this->sectionRepo->findOrFail($id);
 
 		$data = Input::all();
 		
@@ -112,8 +82,7 @@ class AdminSectionsController extends \BaseController {
 
 		if ($validator->passes()) 
 		{
-			$section->fill($data);
-			$section->save();
+			$section = $this->sectionRepo->update($section, $data);
 			return Redirect::route('admin.sections.show', $section->id);
 		} 
 		else 
@@ -122,17 +91,9 @@ class AdminSectionsController extends \BaseController {
 		}
 	}
 
-
-	/**
-	 * Remove the specified resource from storage.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
 	public function destroy($id)
 	{
-		$section = Section::findOrFail($id);
-		$section->delete();
+		$this->sectionRepo->delete($id);
 
 		Redirect::route('admin.sections.index');
 	}
